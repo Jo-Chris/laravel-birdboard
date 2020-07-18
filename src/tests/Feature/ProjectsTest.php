@@ -14,12 +14,31 @@ class ProjectsTest extends TestCase
     /** @test */
     public function a_user_can_create_a_project()
     {
+        $this->withoutExceptionHandling();
+
         $attr = [
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph
         ];
 
-        $this->post('/projects', $attr);
+        $this->post('/projects', $attr)->assertRedirect('/projects');
+
         $this->assertDatabaseHas('projects', $attr);
+
+        $this->get('/projects')->assertSee($attr['title']);
     }
+
+    /** @test */
+    public function a_project_requires_a_title() {
+        $attributes = factory('App\Project')->raw(['title' => '']);
+        $this->post('/projects', $attributes)->assertSessionHasErrors('title');
+    }
+
+    /** @test */
+    public function a_project_requires_a_description() {
+        $attributes = factory('App\Project')->raw(['description' => '']);
+
+        $this->post('/projects', [])->assertSessionHasErrors('description');
+    }
+
 }
