@@ -10,20 +10,19 @@
             <div class="field">
                 <label for="title"> Title </label>
                 <div class="control">
-                    <input type="text" class="input" name="" placeholder="">
+                    <input type="text" class="resize-none border rounded focus:outline-none focus:shadow-outline" name="title" placeholder="">
                 </div>
             </div>
             <div class="field">
                 <label for="description"> Description </label>
                 <div class="control">
-                    <textarea name="description" id="" cols="30" rows="10"></textarea>
+                    <textarea class="resize-none border rounded focus:outline-none focus:shadow-outline" name="description" id="" cols="30" rows="10"></textarea>
                 </div>
             </div>
             <div class="field">
-                <label for="description"> Create Project </label>
-                <div class="control">
-                    <button name="description" id="" cols="30" rows="10">Create Project</button>
-                    <a href="/projects"> Cancel </a>
+                <div class="control mt-4">
+                    <button class="btn btn-primary" id="" cols="30" rows="10" type="submit">Create Project</button>
+                    <a href="/projects" class="text-danger"> Cancel </a>
                 </div>
             </div>
         </form>
