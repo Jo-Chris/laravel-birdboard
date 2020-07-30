@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class ProjectsTest extends TestCase
+class ManageProjectsTest extends TestCase
 {
 
     use WithFaker, RefreshDatabase;
@@ -14,31 +14,45 @@ class ProjectsTest extends TestCase
     /** @test */
     public function a_user_can_create_a_project()
     {
-        $this->actingAs(factory('App\User')->create());
-
-        $this->withoutExceptionHandling();
+        // Erreichbar
+        $this->get('projects/create')->assertStatus(200);
 
         $attr = [
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph
         ];
 
+        // Erzeugbar
         $this->post('/projects', $attr)->assertRedirect('/projects');
 
+        // Einsehbar
         $this->assertDatabaseHas('projects', $attr);
-
-        $this->get('/projects')->assertSee($attr['title']);
     }
 
     /** @test */
-    public function a_user_can_view_a_project() {
+    public function a_user_can_view_their_project() {
+        $this->be(factory('App\User')->create());
+
+
         $this->withoutExceptionHandling();
 
-        $project = factory('App\Project')->create();
+
+        $project = factory('App\Project')->create(['owner_id' => auth()->id()]);
 
         $this->get('/projects/' . $project->id)
             ->assertSee($project->title)
             ->assertSee($project->description);
+
+    }
+
+    /** @test */
+    public function an_authenticated_cannot_view_the_projects_from_others() {
+
+        $this->be(factory('App\User')->create());
+
+        $project = factory('App\Project')->create();
+
+        $this->get($project->path())->assertStatus(403);
 
     }
 
@@ -69,10 +83,13 @@ class ProjectsTest extends TestCase
     }
 
     /** @test */
-    public function only_authenticated_users_can_create_projects(){
-        $attributes = factory('App\Project')->raw();
+    public function guests_cannot_manage_projects(){
+        $project = factory('App\Project')->create();
 
-        $this->post('/projects', $attributes)->assertRedirect('login');
+        $this->post('/projects', $project->toArray())->assertRedirect('login');
+        $this->get('/projects/create')->assertRedirect('login');
+        $this->get('/projects')->assertRedirect('login');
+        $this->get($project->path())->assertRedirect('login');
     }
 
 }
